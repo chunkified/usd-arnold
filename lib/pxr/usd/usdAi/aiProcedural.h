@@ -52,16 +52,16 @@ class SdfAssetPath;
 
 /// \class UsdAiProcedural
 ///
-/// Represents an Arnold procedural shape node.
+/// Represents an Arnold procedural node, defined in terms of a scene
+/// description file (.ass, .obj, or .ply).
 ///
 class UsdAiProcedural : public UsdGeomBoundable
 {
 public:
-    /// Compile-time constant indicating whether or not this class corresponds
-    /// to a concrete instantiable prim type in scene description.  If this is
-    /// true, GetStaticPrimDefinition() will return a valid prim definition with
-    /// a non-empty typeName.
-    static const bool IsConcrete = true;
+    /// Compile time constant representing what kind of schema this class is.
+    ///
+    /// \sa UsdSchemaType
+    static const UsdSchemaType schemaType = UsdSchemaType::ConcreteTyped;
 
     /// Construct a UsdAiProcedural on UsdPrim \p prim .
     /// Equivalent to UsdAiProcedural::Get(prim.GetStage(), prim.GetPath())
@@ -130,6 +130,13 @@ public:
     static UsdAiProcedural
     Define(const UsdStagePtr &stage, const SdfPath &path);
 
+protected:
+    /// Returns the type of schema this class belongs to.
+    ///
+    /// \sa UsdSchemaType
+    USDAI_API
+    virtual UsdSchemaType _GetSchemaType() const;
+
 private:
     // needs to invoke _GetStaticTfType.
     friend class UsdSchemaRegistry;
@@ -144,76 +151,24 @@ private:
 
 public:
     // --------------------------------------------------------------------- //
-    // DSO 
+    // FILEPATH 
     // --------------------------------------------------------------------- //
-    /// A procedural can point to ass, obj, and ply filetypes, or to a
-    /// dll or so, which will be recognized as a compiled procedural
-    /// program.
+    /// The path to the scene description file.
     ///
-    /// \n  C++ Type: std::string
-    /// \n  Usd Type: SdfValueTypeNames->String
-    /// \n  Variability: SdfVariabilityUniform
+    /// \n  C++ Type: SdfAssetPath
+    /// \n  Usd Type: SdfValueTypeNames->Asset
+    /// \n  Variability: SdfVariabilityVarying
     /// \n  Fallback Value: No Fallback
     USDAI_API
-    UsdAttribute GetDsoAttr() const;
+    UsdAttribute GetFilepathAttr() const;
 
-    /// See GetDsoAttr(), and also 
+    /// See GetFilepathAttr(), and also 
     /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
     /// If specified, author \p defaultValue as the attribute's default,
     /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
     /// the default for \p writeSparsely is \c false.
     USDAI_API
-    UsdAttribute CreateDsoAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
-
-public:
-    // --------------------------------------------------------------------- //
-    // DATA 
-    // --------------------------------------------------------------------- //
-    /// This string parameter is used to pass parameters that are
-    /// parsed by the procedural program and can be used for its
-    /// creation/initialization.
-    /// 
-    /// The format of this string is not standard and is dictated by
-    /// the particular implementation of each procedural program. A
-    /// better and more compact way of passing parameters and data to
-    /// the procedural is through user data.
-    ///
-    /// \n  C++ Type: std::string
-    /// \n  Usd Type: SdfValueTypeNames->String
-    /// \n  Variability: SdfVariabilityVarying
-    /// \n  Fallback Value: 
-    USDAI_API
-    UsdAttribute GetDataAttr() const;
-
-    /// See GetDataAttr(), and also 
-    /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
-    /// If specified, author \p defaultValue as the attribute's default,
-    /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
-    /// the default for \p writeSparsely is \c false.
-    USDAI_API
-    UsdAttribute CreateDataAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
-
-public:
-    // --------------------------------------------------------------------- //
-    // LOADATINIT 
-    // --------------------------------------------------------------------- //
-    /// Whether to force the loading of the procedural during the
-    /// initialization process.
-    ///
-    /// \n  C++ Type: bool
-    /// \n  Usd Type: SdfValueTypeNames->Bool
-    /// \n  Variability: SdfVariabilityUniform
-    /// \n  Fallback Value: False
-    USDAI_API
-    UsdAttribute GetLoadAtInitAttr() const;
-
-    /// See GetLoadAtInitAttr(), and also 
-    /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
-    /// If specified, author \p defaultValue as the attribute's default,
-    /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
-    /// the default for \p writeSparsely is \c false.
-    USDAI_API
-    UsdAttribute CreateLoadAtInitAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
+    UsdAttribute CreateFilepathAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
 
 public:
     // ===================================================================== //

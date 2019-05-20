@@ -62,6 +62,13 @@ _CreateDataTypeAttr(UsdAiAOV &self,
     return self.CreateDataTypeAttr(
         UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Token), writeSparsely);
 }
+        
+static UsdAttribute
+_CreateLPEAttr(UsdAiAOV &self,
+                                      object defaultVal, bool writeSparsely) {
+    return self.CreateLPEAttr(
+        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->String), writeSparsely);
+}
 
 } // anonymous namespace
 
@@ -107,6 +114,13 @@ void wrapUsdAiAOV()
              &This::GetDataTypeAttr)
         .def("CreateDataTypeAttr",
              &_CreateDataTypeAttr,
+             (arg("defaultValue")=object(),
+              arg("writeSparsely")=false))
+        
+        .def("GetLPEAttr",
+             &This::GetLPEAttr)
+        .def("CreateLPEAttr",
+             &_CreateLPEAttr,
              (arg("defaultValue")=object(),
               arg("writeSparsely")=false))
 

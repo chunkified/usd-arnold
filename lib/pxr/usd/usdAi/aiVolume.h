@@ -28,7 +28,7 @@
 
 #include "pxr/pxr.h"
 #include "pxr/usd/usdAi/api.h"
-#include "pxr/usd/usdAi/aiProcedural.h"
+#include "pxr/usd/usdGeom/boundable.h"
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdAi/tokens.h"
@@ -53,26 +53,24 @@ class SdfAssetPath;
 /// \class UsdAiVolume
 ///
 /// Represents an Arnold volume node.
+/// This node is designed to handle OpenVDB files, so we don't
+/// inherit from AiProcedural.
 /// 
-/// This class inherits AiProcedural because Arnold's volume node has
-/// essentially the same parameters as the procedural node, except for
-/// a couple of slight variations.
 ///
-class UsdAiVolume : public UsdAiProcedural
+class UsdAiVolume : public UsdGeomBoundable
 {
 public:
-    /// Compile-time constant indicating whether or not this class corresponds
-    /// to a concrete instantiable prim type in scene description.  If this is
-    /// true, GetStaticPrimDefinition() will return a valid prim definition with
-    /// a non-empty typeName.
-    static const bool IsConcrete = true;
+    /// Compile time constant representing what kind of schema this class is.
+    ///
+    /// \sa UsdSchemaType
+    static const UsdSchemaType schemaType = UsdSchemaType::ConcreteTyped;
 
     /// Construct a UsdAiVolume on UsdPrim \p prim .
     /// Equivalent to UsdAiVolume::Get(prim.GetStage(), prim.GetPath())
     /// for a \em valid \p prim, but will not immediately throw an error for
     /// an invalid \p prim
     explicit UsdAiVolume(const UsdPrim& prim=UsdPrim())
-        : UsdAiProcedural(prim)
+        : UsdGeomBoundable(prim)
     {
     }
 
@@ -80,7 +78,7 @@ public:
     /// Should be preferred over UsdAiVolume(schemaObj.GetPrim()),
     /// as it preserves SchemaBase state.
     explicit UsdAiVolume(const UsdSchemaBase& schemaObj)
-        : UsdAiProcedural(schemaObj)
+        : UsdGeomBoundable(schemaObj)
     {
     }
 
@@ -134,6 +132,13 @@ public:
     static UsdAiVolume
     Define(const UsdStagePtr &stage, const SdfPath &path);
 
+protected:
+    /// Returns the type of schema this class belongs to.
+    ///
+    /// \sa UsdSchemaType
+    USDAI_API
+    virtual UsdSchemaType _GetSchemaType() const;
+
 private:
     // needs to invoke _GetStaticTfType.
     friend class UsdSchemaRegistry;
@@ -148,10 +153,31 @@ private:
 
 public:
     // --------------------------------------------------------------------- //
+    // FILENAME 
+    // --------------------------------------------------------------------- //
+    /// Asset path to the file containg the volume data.
+    ///
+    /// \n  C++ Type: SdfAssetPath
+    /// \n  Usd Type: SdfValueTypeNames->Asset
+    /// \n  Variability: SdfVariabilityVarying
+    /// \n  Fallback Value: @@
+    USDAI_API
+    UsdAttribute GetFilenameAttr() const;
+
+    /// See GetFilenameAttr(), and also 
+    /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
+    /// If specified, author \p defaultValue as the attribute's default,
+    /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
+    /// the default for \p writeSparsely is \c false.
+    USDAI_API
+    UsdAttribute CreateFilenameAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
+
+public:
+    // --------------------------------------------------------------------- //
     // STEPSIZE 
     // --------------------------------------------------------------------- //
     /// Sampling step size inside the volume.
-    /// I think 0 means automatic.
+    /// 0 means equal to the smallest axis of each voxel.
     ///
     /// \n  C++ Type: float
     /// \n  Usd Type: SdfValueTypeNames->Float

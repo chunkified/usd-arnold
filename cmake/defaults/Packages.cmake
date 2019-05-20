@@ -33,6 +33,12 @@ set(build_shared_libs "${BUILD_SHARED_LIBS}")
 find_package(USD REQUIRED)
 find_package(Arnold REQUIRED)
 
+# USD Arnold HD Renderer Requirement
+# ----------------------------------------------
+if (BUILD_USD_PLUGIN OR BUILD_USD_IMAGING_PLUGIN)
+    find_package(GLEW REQUIRED)
+endif ()
+
 # Core USD Package Requirements 
 # ----------------------------------------------
 
@@ -45,7 +51,10 @@ set(PXR_THREAD_LIBS "${CMAKE_THREAD_LIBS_INIT}")
 
 if(PXR_ENABLE_PYTHON_SUPPORT)
     # --Python.  We are generally but not completely 2.6 compliant.
-    add_definitions(-DPXR_PYTHON_SUPPORT_ENABLED)
+    # We don't need this flag if we are on 0.8.2.
+    if (${USD_VERSION} VERSION_LESS "0.8.2")
+        add_definitions(-DPXR_PYTHON_SUPPORT_ENABLED)
+    endif ()
     find_package(PythonInterp 2.7 REQUIRED)
     find_package(PythonLibs 2.7 REQUIRED)
 
@@ -62,9 +71,6 @@ else()
 endif()
 
 # --TBB
-# LUMA: Force off for now, because turning it on causes usdview to error out
-# (Worrisome! see: https://github.com/PixarAnimationStudios/USD/issues/147)
-set(TBB_USE_DEBUG_BUILD OFF)
 find_package(TBB REQUIRED COMPONENTS tbb)
 add_definitions(${TBB_DEFINITIONS})
 

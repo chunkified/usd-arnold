@@ -24,6 +24,7 @@
 #include "pxr/usd/usdAi/aiMaterialAPI.h"
 #include "pxr/usd/usd/schemaRegistry.h"
 #include "pxr/usd/usd/typed.h"
+#include "pxr/usd/usd/tokens.h"
 
 #include "pxr/usd/sdf/types.h"
 #include "pxr/usd/sdf/assetPath.h"
@@ -34,9 +35,14 @@ PXR_NAMESPACE_OPEN_SCOPE
 TF_REGISTRY_FUNCTION(TfType)
 {
     TfType::Define<UsdAiMaterialAPI,
-        TfType::Bases< UsdSchemaBase > >();
+        TfType::Bases< UsdAPISchemaBase > >();
     
 }
+
+TF_DEFINE_PRIVATE_TOKENS(
+    _schemaTokens,
+    (AiMaterialAPI)
+);
 
 /* virtual */
 UsdAiMaterialAPI::~UsdAiMaterialAPI()
@@ -54,6 +60,19 @@ UsdAiMaterialAPI::Get(const UsdStagePtr &stage, const SdfPath &path)
     return UsdAiMaterialAPI(stage->GetPrimAtPath(path));
 }
 
+
+/* virtual */
+UsdSchemaType UsdAiMaterialAPI::_GetSchemaType() const {
+    return UsdAiMaterialAPI::schemaType;
+}
+
+/* static */
+UsdAiMaterialAPI
+UsdAiMaterialAPI::Apply(const UsdPrim &prim)
+{
+    return UsdAPISchemaBase::_ApplyAPISchema<UsdAiMaterialAPI>(
+            prim, _schemaTokens->AiMaterialAPI);
+}
 
 /* static */
 const TfType &
@@ -104,13 +123,26 @@ UsdAiMaterialAPI::CreateDisplacementRel() const
                        /* custom = */ false);
 }
 
+UsdRelationship
+UsdAiMaterialAPI::GetVolumeRel() const
+{
+    return GetPrim().GetRelationship(UsdAiTokens->aiVolume);
+}
+
+UsdRelationship
+UsdAiMaterialAPI::CreateVolumeRel() const
+{
+    return GetPrim().CreateRelationship(UsdAiTokens->aiVolume,
+                       /* custom = */ false);
+}
+
 /*static*/
 const TfTokenVector&
 UsdAiMaterialAPI::GetSchemaAttributeNames(bool includeInherited)
 {
     static TfTokenVector localNames;
     static TfTokenVector allNames =
-        UsdSchemaBase::GetSchemaAttributeNames(true);
+        UsdAPISchemaBase::GetSchemaAttributeNames(true);
 
     if (includeInherited)
         return allNames;

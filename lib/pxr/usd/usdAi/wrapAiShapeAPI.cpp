@@ -363,7 +363,7 @@ void wrapUsdAiShapeAPI()
 {
     typedef UsdAiShapeAPI This;
 
-    class_<This, bases<UsdSchemaBase> >
+    class_<This, bases<UsdAPISchemaBase> >
         cls("AiShapeAPI");
 
     cls
@@ -374,6 +374,8 @@ void wrapUsdAiShapeAPI()
         .def("Get", &This::Get, (arg("stage"), arg("path")))
         .staticmethod("Get")
 
+        .def("Apply", &This::Apply, (arg("prim")))
+        .staticmethod("Apply")
 
         .def("GetSchemaAttributeNames",
              &This::GetSchemaAttributeNames,

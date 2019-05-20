@@ -50,6 +50,13 @@ WRAP_CUSTOM;
 
         
 static UsdAttribute
+_CreateFilenameAttr(UsdAiVolume &self,
+                                      object defaultVal, bool writeSparsely) {
+    return self.CreateFilenameAttr(
+        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Asset), writeSparsely);
+}
+        
+static UsdAttribute
 _CreateStepSizeAttr(UsdAiVolume &self,
                                       object defaultVal, bool writeSparsely) {
     return self.CreateStepSizeAttr(
@@ -62,7 +69,7 @@ void wrapUsdAiVolume()
 {
     typedef UsdAiVolume This;
 
-    class_<This, bases<UsdAiProcedural> >
+    class_<This, bases<UsdGeomBoundable> >
         cls("AiVolume");
 
     cls
@@ -88,6 +95,13 @@ void wrapUsdAiVolume()
 
         .def(!self)
 
+        
+        .def("GetFilenameAttr",
+             &This::GetFilenameAttr)
+        .def("CreateFilenameAttr",
+             &_CreateFilenameAttr,
+             (arg("defaultValue")=object(),
+              arg("writeSparsely")=false))
         
         .def("GetStepSizeAttr",
              &This::GetStepSizeAttr)

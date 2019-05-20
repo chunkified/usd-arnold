@@ -15,9 +15,10 @@ USD Schemas and tools for exchanging Arnold shader information between multiple 
     * AiVolume - Schema for Arnold's volume node.
 * Shader exporter for usdMaya. A custom shading mode exporter for Maya that exports all Arnold shader definitions via MtoA. We support MtoA-1.2 and MtoA-1.4.
 * Tools for usdKatana. Ops for describing and reading in procedurals to Katana.
+* Arnold render delegate.
+* Arnold shader discovery and parsing.
 
 ### Planned
-* Supporting MtoA-2.x.
 * Adding a material importer for usdKatana. For more information, see building USD.
 * Making sure USD-Arnold works with a base installation of USD.
 * Build all the packages at once.
@@ -33,11 +34,9 @@ At this moment USD-Arnold relies on several customizations and fixes to USD, mos
 Building Luma Pictures' flavor of USD is the easiest option, we provide a set of new features, mostly to usdMaya and usdKatana, none of which are breaking any existing behavior in USD. Clone the repository at [https://github.com/LumaPictures/USD](https://github.com/LumaPictures/USD) and build the branch tg/luma/luma following the official build instructions. Note, we changed the default implementation for TfHashMap and TfHashSet to improve stability, make sure you build all your plugins using this version.
 
 ### Use the official version and apply patches
-Clone the latest dev version of USD, and apply the following PRs.
-* [228](https://github.com/PixarAnimationStudios/USD/pull/228)
-* [226](https://github.com/PixarAnimationStudios/USD/pull/226)
+Clone the latest dev version of USD, and apply the following change to support importing arnold materials in Katana:
 
-You'll also need to add a few lines of code to usdKatana's readMaterial.cpp source file. Just replace the file of origin with our [own version](https://github.com/LumaPictures/USD/blob/tg/luma/luma/third_party/katana/lib/usdKatana/readMaterial.cpp), it does not contain any additional changes. We are working on standardizing material reads with Pixar and hoping to remove this requirement shortly.
+Replace the file with Luma's [version](https://github.com/LumaPictures/USD/blob/tg/luma/luma/third_party/katana/lib/usdKatana/readMaterial.cpp).
 
 ## Build enviroment
 ### Requirements
@@ -46,16 +45,18 @@ We use and test with the following library versions.
 
 | Name    | Version          |
 | ------- | ---------------- |
-| GCC     | 4.8.5            |
+| GCC     | 4.8.5 / 6.3.1    |
 | Boost   | 1.61.0           |
-| TBB     | 4.4.6            |
+| TBB     | 2017.x           |
 | OpenEXR | 2.2.0 - latest   |
-| MtoA    | 1.2.x and 1.4.2  |
-| Katana  | 2.5v6            |
-| Maya    | 2016.5 and 2017  |
+| MtoA    | 3.x              |
+| Katana  | 2.5v6  - 3.x     |
+| Maya    | 2018 - 2019      |
+| Arnold  | 5.2.x            |
 
 You can use configuration variables to enable/disable individual components during the build process. These are the following.
 * BUILD\_USD\_PLUGIN - Generating the schemas.
+* BUILD\_USD\_IMAGING\_PLUGIN - Building the render delegate and ndr plugins.
 * BUILD\_USD\_MAYA\_PLUGIN - Building the usdMaya plugin.
 * BUILD\_USD\_KATANA\_PLUGIN - Building the usdKatana plugin.
 

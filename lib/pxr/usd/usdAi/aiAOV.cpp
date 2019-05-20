@@ -74,6 +74,11 @@ UsdAiAOV::Define(
         stage->DefinePrim(path, usdPrimTypeName));
 }
 
+/* virtual */
+UsdSchemaType UsdAiAOV::_GetSchemaType() const {
+    return UsdAiAOV::schemaType;
+}
+
 /* static */
 const TfType &
 UsdAiAOV::_GetStaticTfType()
@@ -131,6 +136,23 @@ UsdAiAOV::CreateDataTypeAttr(VtValue const &defaultValue, bool writeSparsely) co
                        writeSparsely);
 }
 
+UsdAttribute
+UsdAiAOV::GetLPEAttr() const
+{
+    return GetPrim().GetAttribute(UsdAiTokens->lPE);
+}
+
+UsdAttribute
+UsdAiAOV::CreateLPEAttr(VtValue const &defaultValue, bool writeSparsely) const
+{
+    return UsdSchemaBase::_CreateAttr(UsdAiTokens->lPE,
+                       SdfValueTypeNames->String,
+                       /* custom = */ false,
+                       SdfVariabilityUniform,
+                       defaultValue,
+                       writeSparsely);
+}
+
 UsdRelationship
 UsdAiAOV::GetDriverRel() const
 {
@@ -176,6 +198,7 @@ UsdAiAOV::GetSchemaAttributeNames(bool includeInherited)
     static TfTokenVector localNames = {
         UsdAiTokens->name,
         UsdAiTokens->dataType,
+        UsdAiTokens->lPE,
     };
     static TfTokenVector allNames =
         _ConcatenateAttributeNames(

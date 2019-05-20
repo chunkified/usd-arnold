@@ -55,7 +55,7 @@ void wrapUsdAiMaterialAPI()
 {
     typedef UsdAiMaterialAPI This;
 
-    class_<This, bases<UsdSchemaBase> >
+    class_<This, bases<UsdAPISchemaBase> >
         cls("AiMaterialAPI");
 
     cls
@@ -66,6 +66,8 @@ void wrapUsdAiMaterialAPI()
         .def("Get", &This::Get, (arg("stage"), arg("path")))
         .staticmethod("Get")
 
+        .def("Apply", &This::Apply, (arg("prim")))
+        .staticmethod("Apply")
 
         .def("GetSchemaAttributeNames",
              &This::GetSchemaAttributeNames,
@@ -90,6 +92,11 @@ void wrapUsdAiMaterialAPI()
              &This::GetDisplacementRel)
         .def("CreateDisplacementRel",
              &This::CreateDisplacementRel)
+        
+        .def("GetVolumeRel",
+             &This::GetVolumeRel)
+        .def("CreateVolumeRel",
+             &This::CreateVolumeRel)
     ;
 
     _CustomWrapCode(cls);

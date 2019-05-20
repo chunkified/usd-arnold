@@ -28,9 +28,12 @@
 
 #include "pxr/pxr.h"
 #include "pxr/usd/usdAi/api.h"
-#include "pxr/usd/usd/schemaBase.h"
+#include "pxr/usd/usd/apiSchemaBase.h"
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/stage.h"
+#include "pxr/usd/usdAi/tokens.h"
+
+struct AtMetaDataEntry;
 
 #include "pxr/base/vt/value.h"
 
@@ -54,21 +57,25 @@ class SdfAssetPath;
 /// API for handling prims as Arnold nodes. Provides a consistent
 /// interface for getting and setting user parameters.
 ///
-class UsdAiNodeAPI : public UsdSchemaBase
+/// For any described attribute \em Fallback \em Value or \em Allowed \em Values below
+/// that are text/tokens, the actual token is published and defined in \ref UsdAiTokens.
+/// So to set an attribute to the value "rightHanded", use UsdAiTokens->rightHanded
+/// as the value.
+///
+class UsdAiNodeAPI : public UsdAPISchemaBase
 {
 public:
-    /// Compile-time constant indicating whether or not this class corresponds
-    /// to a concrete instantiable prim type in scene description.  If this is
-    /// true, GetStaticPrimDefinition() will return a valid prim definition with
-    /// a non-empty typeName.
-    static const bool IsConcrete = false;
+    /// Compile time constant representing what kind of schema this class is.
+    ///
+    /// \sa UsdSchemaType
+    static const UsdSchemaType schemaType = UsdSchemaType::SingleApplyAPI;
 
     /// Construct a UsdAiNodeAPI on UsdPrim \p prim .
     /// Equivalent to UsdAiNodeAPI::Get(prim.GetStage(), prim.GetPath())
     /// for a \em valid \p prim, but will not immediately throw an error for
     /// an invalid \p prim
     explicit UsdAiNodeAPI(const UsdPrim& prim=UsdPrim())
-        : UsdSchemaBase(prim)
+        : UsdAPISchemaBase(prim)
     {
     }
 
@@ -76,7 +83,7 @@ public:
     /// Should be preferred over UsdAiNodeAPI(schemaObj.GetPrim()),
     /// as it preserves SchemaBase state.
     explicit UsdAiNodeAPI(const UsdSchemaBase& schemaObj)
-        : UsdSchemaBase(schemaObj)
+        : UsdAPISchemaBase(schemaObj)
     {
     }
 
@@ -105,6 +112,29 @@ public:
     Get(const UsdStagePtr &stage, const SdfPath &path);
 
 
+    /// Applies this <b>single-apply</b> API schema to the given \p prim.
+    /// This information is stored by adding "AiNodeAPI" to the 
+    /// token-valued, listOp metadata \em apiSchemas on the prim.
+    /// 
+    /// \return A valid UsdAiNodeAPI object is returned upon success. 
+    /// An invalid (or empty) UsdAiNodeAPI object is returned upon 
+    /// failure. See \ref UsdAPISchemaBase::_ApplyAPISchema() for conditions 
+    /// resulting in failure. 
+    /// 
+    /// \sa UsdPrim::GetAppliedSchemas()
+    /// \sa UsdPrim::HasAPI()
+    ///
+    USDAI_API
+    static UsdAiNodeAPI 
+    Apply(const UsdPrim &prim);
+
+protected:
+    /// Returns the type of schema this class belongs to.
+    ///
+    /// \sa UsdSchemaType
+    USDAI_API
+    virtual UsdSchemaType _GetSchemaType() const;
+
 private:
     // needs to invoke _GetStaticTfType.
     friend class UsdSchemaRegistry;
@@ -116,6 +146,29 @@ private:
     // override SchemaBase virtuals.
     USDAI_API
     virtual const TfType &_GetTfType() const;
+
+public:
+    // --------------------------------------------------------------------- //
+    // NODEENTRYTYPE 
+    // --------------------------------------------------------------------- //
+    /// The node entry type identifies the type of the node entry for each arnold node.
+    /// Like, camera, shape, procedural, shader, filter, driver, etc.
+    /// 
+    ///
+    /// \n  C++ Type: TfToken
+    /// \n  Usd Type: SdfValueTypeNames->Token
+    /// \n  Variability: SdfVariabilityUniform
+    /// \n  Fallback Value: No Fallback
+    USDAI_API
+    UsdAttribute GetNodeEntryTypeAttr() const;
+
+    /// See GetNodeEntryTypeAttr(), and also 
+    /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
+    /// If specified, author \p defaultValue as the attribute's default,
+    /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
+    /// the default for \p writeSparsely is \c false.
+    USDAI_API
+    UsdAttribute CreateNodeEntryTypeAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
 
 public:
     // ===================================================================== //
@@ -140,6 +193,40 @@ public:
 
     // Return all attributes in the "user:" namespace.
     std::vector<UsdAttribute> GetUserAttributes() const;
+
+    // Return all "metadata" for a given attribute.
+    // Since it's not trivial to define metadata names dynamically,
+    // we need to prefix the metadata with the attribute's name.
+    std::vector<UsdAttribute> GetMetadataForAttribute(const UsdAttribute& attr) const;
+
+    // Add metadata to usd attribute, the automated way.
+    // We are using a pointer here, in case Solid Angle decides
+    // to hide the interface in the future.
+    void AddMetadataToAttribute(
+        const UsdAttribute& attr,
+        const AtMetaDataEntry* meta) const;
+
+    // Adding new, dynamic metadata to an existing attribute.
+    UsdAttribute AddMetadataToAttribute(
+        const UsdAttribute& attr,
+        const TfToken& name,
+        const SdfValueTypeName& typeName,
+        const VtValue& value) const;
+
+    // Getting the metadata name from the parameter name.
+    static TfToken GetMetadataNameFromAttr(const UsdAttribute& attr);
+
+    // Returns a token from AtNodeEntry's GetType.
+    static TfToken GetNodeEntryTokenFromType(int nodeEntryType);
+
+    // Returns a node entry type from a TfToken.
+    static int GetNodeEntryTypeFromToken(const TfToken& nodeEntryTypeName);
+
+    // Returns a token from AtParamEntry's GetType.
+    static TfToken GetParamTypeTokenFromType(int paramEntryType);
+
+    // Returns a param type from a TfToken.
+    static int GetParamTypeFromToken(const TfToken& paramEntryTypeName);
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE

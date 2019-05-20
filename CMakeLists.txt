@@ -28,32 +28,44 @@ set(CMAKE_CXX_FLAGS "${_PXR_CXX_FLAGS} ${CMAKE_CXX_FLAGS}")
 include(Public)
 
 # add_compile_options(-Wall -DBUILD_OPTLEVEL_OPT -DBUILD_COMPONENT_SRC_PREFIX="")
-set(CMAKE_CXX_STANDARD 11)
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 
-include_directories(${USD_INCLUDE_DIR})
+include_directories(SYSTEM ${USD_INCLUDE_DIR})
 link_directories(${USD_LIBRARY_DIR})
-include_directories(${ARNOLD_INCLUDE_DIR})
+include_directories(SYSTEM ${ARNOLD_INCLUDE_DIR})
 
 include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
 include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
 
 
 if (BUILD_USD_PLUGIN)
-    if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
-        add_subdirectory(lib/pxr/usd/usdAi)
-    else ()
-        add_subdirectory(lib4/pxr/usd/usdAi)
+    if (PXR_BUILD_TESTS)
+        find_package(GTest REQUIRED)
     endif ()
-    
+    add_subdirectory(lib/pxr/usd/usdAi)
+    add_subdirectory(utils)
+endif ()
+
+if (BUILD_USD_IMAGING_PLUGIN)
+    add_subdirectory(plugin/pxr/imaging/hdAi)
+    add_subdirectory(plugin/pxr/usd/ndrAi)
+    add_subdirectory(shader)
 endif ()
 
 if (BUILD_USD_MAYA_PLUGIN)
-    add_subdirectory(usdMaya)
+    add_subdirectory(maya)
 endif ()
 
 if (BUILD_USD_KATANA_PLUGIN)
     add_subdirectory(katana)
+endif ()
+
+if (BUILD_USD_HOUDINI_PLUGIN)
+    add_subdirectory(houdini)
 endif ()
 
 install(FILES README.md DESTINATION .)

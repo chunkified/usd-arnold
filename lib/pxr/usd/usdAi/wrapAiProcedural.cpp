@@ -50,24 +50,10 @@ WRAP_CUSTOM;
 
         
 static UsdAttribute
-_CreateDsoAttr(UsdAiProcedural &self,
+_CreateFilepathAttr(UsdAiProcedural &self,
                                       object defaultVal, bool writeSparsely) {
-    return self.CreateDsoAttr(
-        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->String), writeSparsely);
-}
-        
-static UsdAttribute
-_CreateDataAttr(UsdAiProcedural &self,
-                                      object defaultVal, bool writeSparsely) {
-    return self.CreateDataAttr(
-        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->String), writeSparsely);
-}
-        
-static UsdAttribute
-_CreateLoadAtInitAttr(UsdAiProcedural &self,
-                                      object defaultVal, bool writeSparsely) {
-    return self.CreateLoadAtInitAttr(
-        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Bool), writeSparsely);
+    return self.CreateFilepathAttr(
+        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Asset), writeSparsely);
 }
 
 } // anonymous namespace
@@ -103,24 +89,10 @@ void wrapUsdAiProcedural()
         .def(!self)
 
         
-        .def("GetDsoAttr",
-             &This::GetDsoAttr)
-        .def("CreateDsoAttr",
-             &_CreateDsoAttr,
-             (arg("defaultValue")=object(),
-              arg("writeSparsely")=false))
-        
-        .def("GetDataAttr",
-             &This::GetDataAttr)
-        .def("CreateDataAttr",
-             &_CreateDataAttr,
-             (arg("defaultValue")=object(),
-              arg("writeSparsely")=false))
-        
-        .def("GetLoadAtInitAttr",
-             &This::GetLoadAtInitAttr)
-        .def("CreateLoadAtInitAttr",
-             &_CreateLoadAtInitAttr,
+        .def("GetFilepathAttr",
+             &This::GetFilepathAttr)
+        .def("CreateFilepathAttr",
+             &_CreateFilepathAttr,
              (arg("defaultValue")=object(),
               arg("writeSparsely")=false))
 

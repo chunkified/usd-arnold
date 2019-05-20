@@ -23,6 +23,15 @@ def "GLOBAL" (
                 string doc = """The attribute prefix used to qualify user
                                 parameters on nodes using the AiNodeAPI."""
             }
+            dictionary paramType = {
+                string doc = """Stores the arnold parameter type for a parameter."""
+            }
+            dictionary elemType = {
+                string doc = """Stores the arnold parameter type for an array."""
+            }
+            dictionary filename = {
+                string doc = """Stores the file the plugin was loaded from."""
+            }
         }
     }
 )
@@ -30,19 +39,33 @@ def "GLOBAL" (
 }
 
 class "AiNodeAPI" (
+    inherits = </APISchemaBase>
     doc = """API for handling prims as Arnold nodes. Provides a consistent
              interface for getting and setting user parameters."""
+    customData = {
+        string extraIncludes = """
+struct AtMetaDataEntry;"""
+    }
 ) {
+    uniform token info:node_entry_type (
+        doc = """The node entry type identifies the type of the node entry for each arnold node.
+                 Like, camera, shape, procedural, shader, filter, driver, etc.
+        """
+        customData = {
+            string apiName = "NodeEntryType"
+        }
+    )
 }
 
 class "AiShapeAPI" (
+    inherits = </APISchemaBase>
     doc = """API for interacting with common Arnold shape parameters on prims.
 
              Currently handles:
              - The bitmasks `visibility` and `sidedness`
              - The boolean flags `matte`, `opaque`, `self_shadows`, and
                `receive_shadows`.
-            
+
             To access the ray types without installing arnold,
             include rayTypes.h and use the namespace arnold.
 
@@ -433,7 +456,71 @@ class "AiShapeAPI" (
 
 }
 
+class "AiVolumeAPI" (
+    inherits = </APISchemaBase>
+    doc = """API for interacting with common Arnold volume node parameters on prims."""
+) {
+    float ai:volume_padding = 0 (
+        doc = """Amount to enlarge the volume bounds by."""
+        customData = {
+            string apiName = "aiVolumePadding"
+        }
+    )
+
+    float ai:step_size = 0 (
+        doc = """The step size for sampling inside the volume. If this is set to
+                 0, a step size will be automatically calculated based on the
+                 volume's grid information."""
+        customData = {
+            string apiName = "aiStepSize"
+        }
+    )
+
+    float ai:step_scale = 1 (
+        doc = """A scaling factor applied to the step size, mostly useful when 
+                 `step_size` is set to 0 to modulate the automatic value."""
+        customData = {
+            string apiName = "aiStepScale"
+        }
+    )
+
+    uniform bool ai:compress = true (
+        doc = """Whether to compress grids to reduce memory usage. This is a
+                 lossy compression, however in most cases renders will be almost
+                 the same."""
+        customData = {
+            string apiName = "aiCompress"
+        }
+    )
+
+    float ai:velocity_scale = 1 (
+        doc = """A scale factor for the velocity field. A value of 0 disables 
+                 motion blur."""
+        customData = {
+            string apiName = "aiVelocityScale"
+        }
+    )
+
+    float ai:velocity_fps = 24 (
+        doc = """The frame rate of the velocity value."""
+        customData = {
+            string apiName = "aiVelocityFPS"
+        }
+    )
+
+    float ai:velocity_outlier_threshold = 0.001 (
+        doc = """Controls the filtering of noisy velocities, which can result in
+                 faster rendering of motion blur from physics simulations. The
+                 default value of 0.001 should have little to no visual impact.
+                 Setting this to zero disables filtering entirely."""
+        customData = {
+            string apiName = "aiVelocityOutlierThreshold"
+        }
+    )
+}
+
 class "AiLightAPI" (
+    inherits = </APISchemaBase>
     doc = """API for interacting with common Arnold light parameters."""
 ) {
     uniform string ai:aov = "" (
@@ -442,6 +529,7 @@ class "AiLightAPI" (
 }
 
 class "AiMaterialAPI" (
+    inherits = </APISchemaBase>
     doc = """API for Material prims encapsulating Arnold shading networks."""
 ) {
     rel ai:surface (
@@ -455,6 +543,12 @@ class "AiMaterialAPI" (
             string apiName = "displacement"
         }
     )
+
+    rel ai:volume (
+        customData = {
+            string apiName = "volume"
+        }
+    )
 }
 
 class AiShader "AiShader" (
@@ -465,46 +559,60 @@ class AiShader "AiShader" (
 }
 
 class AiProcedural "AiProcedural" (
-    doc = """Represents an Arnold procedural shape node."""
+    doc = """Represents an Arnold procedural node, defined in terms of a scene
+             description file (.ass, .obj, or .ply)."""
     inherits = </Boundable>
 ) {
-    uniform string dso (
-        doc = """A procedural can point to ass, obj, and ply filetypes, or to a
-                 dll or so, which will be recognized as a compiled procedural
-                 program."""
+    asset filepath (
+        doc = """The path to the scene description file."""
+    )
+}
+
+class AiProceduralNode "AiProceduralNode" (
+    doc = """Represents a custom Arnold procedural node. The node type name must
+             be supplied. Procedural arguments should be specified as attributes
+             in the `user:` namespace."""
+    inherits = </AiProcedural>
+) {
+    asset filepath = @@ (
+        doc = """Path to the DSO which defines the custom procedural node type.
+                 This is optional if the DSO will be found on the Arnold plugin
+                 path or using other means."""
     )
 
-    string data = "" (
-        doc = """This string parameter is used to pass parameters that are
-                 parsed by the procedural program and can be used for its
-                 creation/initialization.
-
-                 The format of this string is not standard and is dictated by
-                 the particular implementation of each procedural program. A
-                 better and more compact way of passing parameters and data to
-                 the procedural is through user data."""
+    uniform token nodeType (
+        doc = """The name of the custom procedural node entry to use."""
     )
+}
 
-    uniform bool loat_at_init = false (
-        doc = """Whether to force the loading of the procedural during the
-                 initialization process."""
+class AiVolumeProcedural "AiVolumeProcedural" (
+    doc = """Handling of custom volume procedurals. The parameters are identical
+             to those of AiProcedural, with the addition of `step_size`."""
+    inherits = </AiProcedural>
+) {
+    float step_size = 0 (
+        doc = """Sampling step size inside the volume.
+                 0 means equal to the smallest axis of each voxel."""
         customData = {
-            string apiName = "loadAtInit"
+            string apiName = "stepSize"
         }
     )
 }
 
 class AiVolume "AiVolume" (
     doc = """Represents an Arnold volume node.
-
-             This class inherits AiProcedural because Arnold's volume node has
-             essentially the same parameters as the procedural node, except for
-             a couple of slight variations."""
-    inherits = </AiProcedural>
+             This node is designed to handle OpenVDB files, so we don't
+             inherit from AiProcedural.
+    """
+    inherits = </Boundable>
 ) {
+    asset filename = @@ (
+        doc = "Asset path to the file containg the volume data."
+    )
+
     float step_size = 0 (
         doc = """Sampling step size inside the volume.
-                 I think 0 means automatic."""
+                 0 means equal to the smallest axis of each voxel."""
         customData = {
             string apiName = "stepSize"
         }
@@ -521,8 +629,29 @@ class AiAOV "AiAOV" (
         doc = """The name of the AOV."""
     )
     token dataType = "RGBA" (
-        allowedTokens = ["BYTE", "INT", "UINT", "BOOL", "FLOAT", "RGB", "RGBA", "VECTOR", "POINT", "POINT2", "POINTER", "NODE", "ARRAY", "MATRIX"]
+        allowedTokens = ["BYTE", "INT", "UINT", "BOOL", "FLOAT", "RGB", "RGBA", "VECTOR", "VECTOR2", "POINTER", "NODE", "ARRAY", "MATRIX"]
+    )
+    uniform string LPE = "" (
+        doc = """The Light Path Expression for the AOV."""
     )
     rel driver
     rel filter
+}
+
+class AiDriver "AiDriver" (
+    inherits = </Typed>
+    doc = """Represents an Arnold driver."""
+) {
+    uniform string path (
+        doc = """Output path for the driver"""
+    )
+}
+
+class AiFilter "AiFilter" (
+    inherits = </Typed>
+    doc = """Represents an Arnold filter."""
+) {
+    uniform float size (
+        doc = """The size of the filter."""
+    )
 }

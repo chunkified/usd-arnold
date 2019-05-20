@@ -48,6 +48,13 @@ namespace {
 // fwd decl.
 WRAP_CUSTOM;
 
+        
+static UsdAttribute
+_CreateNodeEntryTypeAttr(UsdAiNodeAPI &self,
+                                      object defaultVal, bool writeSparsely) {
+    return self.CreateNodeEntryTypeAttr(
+        UsdPythonToSdfType(defaultVal, SdfValueTypeNames->Token), writeSparsely);
+}
 
 } // anonymous namespace
 
@@ -55,7 +62,7 @@ void wrapUsdAiNodeAPI()
 {
     typedef UsdAiNodeAPI This;
 
-    class_<This, bases<UsdSchemaBase> >
+    class_<This, bases<UsdAPISchemaBase> >
         cls("AiNodeAPI");
 
     cls
@@ -66,6 +73,8 @@ void wrapUsdAiNodeAPI()
         .def("Get", &This::Get, (arg("stage"), arg("path")))
         .staticmethod("Get")
 
+        .def("Apply", &This::Apply, (arg("prim")))
+        .staticmethod("Apply")
 
         .def("GetSchemaAttributeNames",
              &This::GetSchemaAttributeNames,
@@ -79,6 +88,13 @@ void wrapUsdAiNodeAPI()
 
         .def(!self)
 
+        
+        .def("GetNodeEntryTypeAttr",
+             &This::GetNodeEntryTypeAttr)
+        .def("CreateNodeEntryTypeAttr",
+             &_CreateNodeEntryTypeAttr,
+             (arg("defaultValue")=object(),
+              arg("writeSparsely")=false))
 
     ;
 

@@ -62,7 +62,7 @@ void wrapUsdAiLightAPI()
 {
     typedef UsdAiLightAPI This;
 
-    class_<This, bases<UsdSchemaBase> >
+    class_<This, bases<UsdAPISchemaBase> >
         cls("AiLightAPI");
 
     cls
@@ -73,6 +73,8 @@ void wrapUsdAiLightAPI()
         .def("Get", &This::Get, (arg("stage"), arg("path")))
         .staticmethod("Get")
 
+        .def("Apply", &This::Apply, (arg("prim")))
+        .staticmethod("Apply")
 
         .def("GetSchemaAttributeNames",
              &This::GetSchemaAttributeNames,

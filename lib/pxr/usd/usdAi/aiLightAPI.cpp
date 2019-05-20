@@ -24,6 +24,7 @@
 #include "pxr/usd/usdAi/aiLightAPI.h"
 #include "pxr/usd/usd/schemaRegistry.h"
 #include "pxr/usd/usd/typed.h"
+#include "pxr/usd/usd/tokens.h"
 
 #include "pxr/usd/sdf/types.h"
 #include "pxr/usd/sdf/assetPath.h"
@@ -34,9 +35,14 @@ PXR_NAMESPACE_OPEN_SCOPE
 TF_REGISTRY_FUNCTION(TfType)
 {
     TfType::Define<UsdAiLightAPI,
-        TfType::Bases< UsdSchemaBase > >();
+        TfType::Bases< UsdAPISchemaBase > >();
     
 }
+
+TF_DEFINE_PRIVATE_TOKENS(
+    _schemaTokens,
+    (AiLightAPI)
+);
 
 /* virtual */
 UsdAiLightAPI::~UsdAiLightAPI()
@@ -54,6 +60,19 @@ UsdAiLightAPI::Get(const UsdStagePtr &stage, const SdfPath &path)
     return UsdAiLightAPI(stage->GetPrimAtPath(path));
 }
 
+
+/* virtual */
+UsdSchemaType UsdAiLightAPI::_GetSchemaType() const {
+    return UsdAiLightAPI::schemaType;
+}
+
+/* static */
+UsdAiLightAPI
+UsdAiLightAPI::Apply(const UsdPrim &prim)
+{
+    return UsdAPISchemaBase::_ApplyAPISchema<UsdAiLightAPI>(
+            prim, _schemaTokens->AiLightAPI);
+}
 
 /* static */
 const TfType &
@@ -116,7 +135,7 @@ UsdAiLightAPI::GetSchemaAttributeNames(bool includeInherited)
     };
     static TfTokenVector allNames =
         _ConcatenateAttributeNames(
-            UsdSchemaBase::GetSchemaAttributeNames(true),
+            UsdAPISchemaBase::GetSchemaAttributeNames(true),
             localNames);
 
     if (includeInherited)

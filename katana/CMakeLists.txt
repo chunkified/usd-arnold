@@ -1,4 +1,4 @@
-set(PLUGIN_NAME ai_procedural_op)
+set(PLUGIN_NAME usd_arnold_katana)
 
 find_package(Katana REQUIRED)
 find_package(OpenEXR REQUIRED)
@@ -17,7 +17,7 @@ file(GLOB FNPLUGINSYSTEM_SRC ${KATANA_API_SOURCE_DIR}/FnPluginSystem/*.cpp)
 file(GLOB FNLOGGING_SRC ${KATANA_API_SOURCE_DIR}/FnLogging/client/*.cpp)
 file(GLOB PYSTRING_SRC ${KATANA_API_SOURCE_DIR}/pystring/*.cpp)
 
-link_directories(${KATANA_API_BASE_DIR}/bin/Geolib3/internal/CEL)
+link_directories(${KATANA_API_BASE_DIR}/bin)
 
 file(GLOB SRC *.cpp)
 set(API_SRC
@@ -37,10 +37,6 @@ target_include_directories(${PLUGIN_NAME} PRIVATE ${USD_ARNOLD_INCLUDE_DIR})
 target_include_directories(${PLUGIN_NAME} PRIVATE ${KATANA_API_INCLUDE_DIR})
 target_include_directories(${PLUGIN_NAME} PRIVATE ${USD_KATANA_INCLUDE_DIR})
 target_link_libraries(${PLUGIN_NAME} CEL ${OPENEXR_LIBRARIES} dl tf gf sdf usd usdGeom ${USD_ARNOLD_LIBRARY} usdKatana)
-
-if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
-    target_compile_definitions(${PLUGIN_NAME} PRIVATE "-DARNOLD5")
-endif ()
 
 install(TARGETS ${PLUGIN_NAME}
         DESTINATION Ops)

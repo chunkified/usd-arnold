@@ -28,7 +28,7 @@
 
 #include "pxr/pxr.h"
 #include "pxr/usd/usdAi/api.h"
-#include "pxr/usd/usd/schemaBase.h"
+#include "pxr/usd/usd/apiSchemaBase.h"
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdAi/tokens.h"
@@ -54,21 +54,20 @@ class SdfAssetPath;
 ///
 /// API for interacting with common Arnold light parameters.
 ///
-class UsdAiLightAPI : public UsdSchemaBase
+class UsdAiLightAPI : public UsdAPISchemaBase
 {
 public:
-    /// Compile-time constant indicating whether or not this class corresponds
-    /// to a concrete instantiable prim type in scene description.  If this is
-    /// true, GetStaticPrimDefinition() will return a valid prim definition with
-    /// a non-empty typeName.
-    static const bool IsConcrete = false;
+    /// Compile time constant representing what kind of schema this class is.
+    ///
+    /// \sa UsdSchemaType
+    static const UsdSchemaType schemaType = UsdSchemaType::SingleApplyAPI;
 
     /// Construct a UsdAiLightAPI on UsdPrim \p prim .
     /// Equivalent to UsdAiLightAPI::Get(prim.GetStage(), prim.GetPath())
     /// for a \em valid \p prim, but will not immediately throw an error for
     /// an invalid \p prim
     explicit UsdAiLightAPI(const UsdPrim& prim=UsdPrim())
-        : UsdSchemaBase(prim)
+        : UsdAPISchemaBase(prim)
     {
     }
 
@@ -76,7 +75,7 @@ public:
     /// Should be preferred over UsdAiLightAPI(schemaObj.GetPrim()),
     /// as it preserves SchemaBase state.
     explicit UsdAiLightAPI(const UsdSchemaBase& schemaObj)
-        : UsdSchemaBase(schemaObj)
+        : UsdAPISchemaBase(schemaObj)
     {
     }
 
@@ -104,6 +103,29 @@ public:
     static UsdAiLightAPI
     Get(const UsdStagePtr &stage, const SdfPath &path);
 
+
+    /// Applies this <b>single-apply</b> API schema to the given \p prim.
+    /// This information is stored by adding "AiLightAPI" to the 
+    /// token-valued, listOp metadata \em apiSchemas on the prim.
+    /// 
+    /// \return A valid UsdAiLightAPI object is returned upon success. 
+    /// An invalid (or empty) UsdAiLightAPI object is returned upon 
+    /// failure. See \ref UsdAPISchemaBase::_ApplyAPISchema() for conditions 
+    /// resulting in failure. 
+    /// 
+    /// \sa UsdPrim::GetAppliedSchemas()
+    /// \sa UsdPrim::HasAPI()
+    ///
+    USDAI_API
+    static UsdAiLightAPI 
+    Apply(const UsdPrim &prim);
+
+protected:
+    /// Returns the type of schema this class belongs to.
+    ///
+    /// \sa UsdSchemaType
+    USDAI_API
+    virtual UsdSchemaType _GetSchemaType() const;
 
 private:
     // needs to invoke _GetStaticTfType.

@@ -74,6 +74,11 @@ UsdAiProcedural::Define(
         stage->DefinePrim(path, usdPrimTypeName));
 }
 
+/* virtual */
+UsdSchemaType UsdAiProcedural::_GetSchemaType() const {
+    return UsdAiProcedural::schemaType;
+}
+
 /* static */
 const TfType &
 UsdAiProcedural::_GetStaticTfType()
@@ -98,52 +103,18 @@ UsdAiProcedural::_GetTfType() const
 }
 
 UsdAttribute
-UsdAiProcedural::GetDsoAttr() const
+UsdAiProcedural::GetFilepathAttr() const
 {
-    return GetPrim().GetAttribute(UsdAiTokens->dso);
+    return GetPrim().GetAttribute(UsdAiTokens->filepath);
 }
 
 UsdAttribute
-UsdAiProcedural::CreateDsoAttr(VtValue const &defaultValue, bool writeSparsely) const
+UsdAiProcedural::CreateFilepathAttr(VtValue const &defaultValue, bool writeSparsely) const
 {
-    return UsdSchemaBase::_CreateAttr(UsdAiTokens->dso,
-                       SdfValueTypeNames->String,
-                       /* custom = */ false,
-                       SdfVariabilityUniform,
-                       defaultValue,
-                       writeSparsely);
-}
-
-UsdAttribute
-UsdAiProcedural::GetDataAttr() const
-{
-    return GetPrim().GetAttribute(UsdAiTokens->data);
-}
-
-UsdAttribute
-UsdAiProcedural::CreateDataAttr(VtValue const &defaultValue, bool writeSparsely) const
-{
-    return UsdSchemaBase::_CreateAttr(UsdAiTokens->data,
-                       SdfValueTypeNames->String,
+    return UsdSchemaBase::_CreateAttr(UsdAiTokens->filepath,
+                       SdfValueTypeNames->Asset,
                        /* custom = */ false,
                        SdfVariabilityVarying,
-                       defaultValue,
-                       writeSparsely);
-}
-
-UsdAttribute
-UsdAiProcedural::GetLoadAtInitAttr() const
-{
-    return GetPrim().GetAttribute(UsdAiTokens->loat_at_init);
-}
-
-UsdAttribute
-UsdAiProcedural::CreateLoadAtInitAttr(VtValue const &defaultValue, bool writeSparsely) const
-{
-    return UsdSchemaBase::_CreateAttr(UsdAiTokens->loat_at_init,
-                       SdfValueTypeNames->Bool,
-                       /* custom = */ false,
-                       SdfVariabilityUniform,
                        defaultValue,
                        writeSparsely);
 }
@@ -165,9 +136,7 @@ const TfTokenVector&
 UsdAiProcedural::GetSchemaAttributeNames(bool includeInherited)
 {
     static TfTokenVector localNames = {
-        UsdAiTokens->dso,
-        UsdAiTokens->data,
-        UsdAiTokens->loat_at_init,
+        UsdAiTokens->filepath,
     };
     static TfTokenVector allNames =
         _ConcatenateAttributeNames(

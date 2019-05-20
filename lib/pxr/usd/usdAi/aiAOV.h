@@ -64,11 +64,10 @@ class SdfAssetPath;
 class UsdAiAOV : public UsdTyped
 {
 public:
-    /// Compile-time constant indicating whether or not this class corresponds
-    /// to a concrete instantiable prim type in scene description.  If this is
-    /// true, GetStaticPrimDefinition() will return a valid prim definition with
-    /// a non-empty typeName.
-    static const bool IsConcrete = true;
+    /// Compile time constant representing what kind of schema this class is.
+    ///
+    /// \sa UsdSchemaType
+    static const UsdSchemaType schemaType = UsdSchemaType::ConcreteTyped;
 
     /// Construct a UsdAiAOV on UsdPrim \p prim .
     /// Equivalent to UsdAiAOV::Get(prim.GetStage(), prim.GetPath())
@@ -137,6 +136,13 @@ public:
     static UsdAiAOV
     Define(const UsdStagePtr &stage, const SdfPath &path);
 
+protected:
+    /// Returns the type of schema this class belongs to.
+    ///
+    /// \sa UsdSchemaType
+    USDAI_API
+    virtual UsdSchemaType _GetSchemaType() const;
+
 private:
     // needs to invoke _GetStaticTfType.
     friend class UsdSchemaRegistry;
@@ -180,7 +186,7 @@ public:
     /// \n  Usd Type: SdfValueTypeNames->Token
     /// \n  Variability: SdfVariabilityVarying
     /// \n  Fallback Value: RGBA
-    /// \n  \ref UsdAiTokens "Allowed Values": [BYTE, INT, UINT, BOOL, FLOAT, RGB, RGBA, VECTOR, POINT, POINT2, POINTER, NODE, ARRAY, MATRIX]
+    /// \n  \ref UsdAiTokens "Allowed Values": [BYTE, INT, UINT, BOOL, FLOAT, RGB, RGBA, VECTOR, VECTOR2, POINTER, NODE, ARRAY, MATRIX]
     USDAI_API
     UsdAttribute GetDataTypeAttr() const;
 
@@ -191,6 +197,27 @@ public:
     /// the default for \p writeSparsely is \c false.
     USDAI_API
     UsdAttribute CreateDataTypeAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
+
+public:
+    // --------------------------------------------------------------------- //
+    // LPE 
+    // --------------------------------------------------------------------- //
+    /// The Light Path Expression for the AOV.
+    ///
+    /// \n  C++ Type: std::string
+    /// \n  Usd Type: SdfValueTypeNames->String
+    /// \n  Variability: SdfVariabilityUniform
+    /// \n  Fallback Value: 
+    USDAI_API
+    UsdAttribute GetLPEAttr() const;
+
+    /// See GetLPEAttr(), and also 
+    /// \ref Usd_Create_Or_Get_Property for when to use Get vs Create.
+    /// If specified, author \p defaultValue as the attribute's default,
+    /// sparsely (when it makes sense to do so) if \p writeSparsely is \c true -
+    /// the default for \p writeSparsely is \c false.
+    USDAI_API
+    UsdAttribute CreateLPEAttr(VtValue const &defaultValue = VtValue(), bool writeSparsely=false) const;
 
 public:
     // --------------------------------------------------------------------- //
